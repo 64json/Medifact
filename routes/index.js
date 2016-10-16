@@ -35,7 +35,7 @@ var SYMPTOMS = [
 var AGE = [];
 for (var i = 0; i < 100; i++) AGE.push(i);
 var GENDERS = ['Female', 'Male', 'Other'];
-var RACES = ['Caucasian', 'Mongolian', 'Negroid'];
+var RACES = ['White', 'Asian', 'Black'];
 
 router.get('/profile', function (req, res, next) {
   res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDERS: GENDERS, RACES: RACES});
