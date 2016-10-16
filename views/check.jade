@@ -10,10 +10,10 @@ block content
         - }
         block report
         div.row.button-row
-            div.col.s4
-                a#btn_add.waves-effect.waves-light.btn.full Add Drugs
-            div.col.s8
-                button.waves-effect.waves-light.btn.full(type="submit") Submit
+            div.col.s5
+                a#btn_add.waves-effect.waves-light.btn.full(style="padding-left: 0; padding-right: 0; white-space: nowrap") Add Drug
+            div.col.s7
+                button.waves-effect.waves-light.btn.full(type="submit") #{report ? 'Report' : 'Check'}
     script.
         if (!$('.menu-report').hasClass('active')) $('.menu-check').addClass('active');
         $('#btn_add').click(function () {

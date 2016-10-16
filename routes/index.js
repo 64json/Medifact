@@ -188,7 +188,7 @@ router.post('/report', function (req, res, next) {
 });
 
 router.get('/report', function (req, res, next) {
-  res.render('report', {title: 'Medifact - Report Symptoms', SYMPTOMS: SYMPTOMS, verb: 'took'});
+  res.render('report', {title: 'Medifact - Report Symptoms', SYMPTOMS: SYMPTOMS, verb: 'took', report: true});
 });
 
 router.get('/clear', function (req, res, next) {
