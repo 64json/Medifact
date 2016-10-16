@@ -216,7 +216,7 @@ router.get('/clear', function (req, res, next) {
 
 router.get('/fake', function (req, res, next) {
   var tasks = [];
-  for (var i = 0; i < 1000; i++) {
+  for (var i = 0; i < 10000; i++) {
     tasks.push(function (callback) {
       var num = Math.random() < (process.env.MED_THREE_RATIO || 0.4) ? 3 : 2;
       var drugs = [];
