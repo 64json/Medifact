@@ -40,7 +40,7 @@ router.get('*', function (req, res, next) {
   res.redirect('/profile');
 });
 
-router.get('/check', function (req, res, next) {
+router.get('/($|check)', function (req, res, next) {
   res.render('check', {title: 'Medifact - Check Combinations', verb: 'will take'});
 });
 
