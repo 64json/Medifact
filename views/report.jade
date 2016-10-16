@@ -1,0 +1,14 @@
+extends check
+
+block report
+    div.row
+        div.input-field.col.s12
+            select(name="symptom")
+                option(value="" disabled selected) choose your symptom
+                each symptom, i in SYMPTOMS
+                    option(value="#{i}") #{symptom}
+            label Symptom
+    script.
+        $(document).ready(function () {
+            $('select').material_select();
+        });

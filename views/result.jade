@@ -1,0 +1,40 @@
+extends layout
+
+block content
+    - var p = val / THRESHOLD
+    - if (p > 5) {
+        - var title = "DEATH"
+        - var color = "black"
+    - } else if (p > 2) {
+        - var title = "HAZARDOUS"
+        - var color = "red"
+    - } else if (p > 1) {
+        - var title = "DANGEROUS"
+        - var color = "orange"
+    - } else if (p > .5) {
+        - var title = "CAUTION"
+        - var color = "yellow"
+    - } else if (p >= 0) {
+        - var title = "SAFE"
+        - var color = "green"
+    - } else {
+        - var title = "NOT ENOUGH DATA"
+        - var color = "purple"
+    - }
+    .col.s12(style="color: #666; margin-bottom: 24px")
+        h3(style="color: #{color}")=title
+        - if (p >= 0) {
+            h5 The possibility of untoward occurrence of #{combination} is <b style="color: #{color}">#{(p * 100).toFixed(2)}%</b> of the threshold.
+        - } else {
+            h5 You are now a test subject.</br><span style="font-size: 10px">We hope you don't die.</span>
+        - }
+    table
+        thead
+            tr
+                th Symptoms
+                th Percentage
+        tbody
+            each symptom in symptoms
+                tr
+                    td #{SYMPTOMS[symptom._id]}
+                    td #{(symptom.count/count*100).toFixed(1)}%

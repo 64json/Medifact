@@ -1,0 +1,26 @@
+extends layout
+
+block content
+    form.col.s12(method='post')
+        - for (var i = 1; i <= 2; ++i) {
+        div.row
+            div.input-field.col.s12
+                input.validate(id="drug#{i}", placeholder="drug #{i} you #{verb}", name="drugs[#{i - 1}]", type="text")
+                label(for="drug#{i}") Drug #{i}
+        - }
+        block report
+        div.row.button-row
+            a.waves-effect.waves-light.btn.col.s5#btn_add Add Drugs
+            .col.s2
+            button.waves-effect.waves-light.btn.col.s5(type="submit") Submit
+    script.
+        $('#btn_add').click(function () {
+            index = $('form .row input.validate').length + 1;
+            cloned = $('form .row:first-child').clone();
+            cloned.find('input').attr("id", "drug" + index);
+            cloned.find('input').attr("placeholder", "drug " + index + " you took");
+            cloned.find('input').attr("name", "drugs[" + (index - 1) + "]")
+            cloned.find('label').attr("for", "drug" + index);
+            cloned.find('label').text("Drug " + index);
+            $('form .row:nth-child(' + index + ')').before(cloned);
+        });

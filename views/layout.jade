@@ -1,0 +1,35 @@
+doctype html
+html
+    head
+        title= title
+        meta(name="theme-color" content="#ee6e73")
+        meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel="stylesheet" href="/stylesheets/materialize.css")
+        link(href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet")
+        script(type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js")
+        script(src="/javascripts/jquery.canvasjs.min.js")
+    body
+        nav
+            div(class="nav-wrapper")
+                a(href="/" class="brand-logo") Medifact
+                a.button-collapse(href="#" data-activates="nav-mobile")
+                    i.material-icons menu
+                ul.side-nav(id="nav-mobile")
+                    li: a(href="check") Check
+                    li: a(href="report") Report
+                    li: a(href="stat") Statistics
+                ul.right.hide-on-small-and-down
+                    li: a(href="check") Check
+                    li: a(href="report") Report
+                    li: a(href="stat") Statistics
+        div.row
+            div.col.s3.manual-padding
+            div.col.s6.main-column.card(style="padding-top: 16px; padding-bottom: 16px")
+                block content
+        script.
+            $(document).ready(function () {
+                $(".button-collapse").sideNav();
+            });
+
