@@ -3,40 +3,70 @@ extends layout
 block content
     - var p = val / THRESHOLD
     - if (p > 5) {
-        - var title = "DEATH"
-        - var color = "black"
+    - var title = "DEATH"
+    - var color = "black"
     - } else if (p > 2) {
-        - var title = "HAZARDOUS"
-        - var color = "red"
+    - var title = "HAZARDOUS"
+    - var color = "#C62828"
     - } else if (p > 1) {
-        - var title = "DANGEROUS"
-        - var color = "orange"
+    - var title = "DANGEROUS"
+    - var color = "#ef6c00"
     - } else if (p > .5) {
-        - var title = "CAUTION"
-        - var color = "yellow"
+    - var title = "CAUTION"
+    - var color = "#fbc02d"
     - } else if (p >= 0) {
-        - var title = "SAFE"
-        - var color = "green"
+    - var title = "SAFE"
+    - var color = "#2E7D32"
     - } else {
-        - var title = "NOT ENOUGH DATA"
-        - var color = "purple"
+    - var title = "NOT ENOUGH DATA"
+    - var color = "#6a1b9a"
     - }
-    .col.s12(style="color: #666; margin-bottom: 24px")
-        h3(style="color: #{color}")=title
+    .col.s12(style="color: #666")
+        h3(style="color: #{color}; margin-top: 0")=title
         - if (p >= 0) {
-            h5 The possibility of untoward occurrence of #{combination} is <b style="color: #{color}">#{(p * 100).toFixed(2)}%</b> of the threshold.
+        h5 The possibility of untoward occurrence of #{combination} is <b style="color: #{color}">#{(p * 100).toFixed(2)}%</b> of the threshold.
         - } else {
-            h5 You are now a test subject.</br><span style="font-size: 10px">We hope you don't die.</span>
+        h5 You are now a test subject.</br><span style="font-size: 10px">We hope you don't die.</span>
         - }
-    table
-        thead
-            tr
-                th Symptoms
-                th Percentage
-        tbody
-            each symptom in symptoms
-                tr
-                    td #{SYMPTOMS[symptom._id]}
-                    td #{(symptom.count/count*100).toFixed(1)}%
     script.
         $('.menu-check').addClass('active');
+block cards
+    div.row
+        div.col.s3.manual-padding
+        div.col.s6.main-column.card
+            table.stat-table.striped
+                thead
+                    tr
+                        th Symptoms
+                        th Percentage
+                tbody
+                    each symptom in symptoms
+                        tr
+                            td #{SYMPTOMS[symptom._id]}
+                            td #{(symptom.count / count * 100).toFixed(1)}%
+    div.row
+        div.col.s3.manual-padding
+        div.col.s6.main-column.card
+            table.stat-table.striped
+                thead
+                    tr
+                        th Ages
+                        th Percentage
+                tbody
+                    each age in ages
+                        tr
+                            td #{age._id * 10} - #{(age._id + 1) * 10 - 1}
+                            td #{(age.count / count * 100).toFixed(1)}%
+    div.row
+        div.col.s3.manual-padding
+        div.col.s6.main-column.card
+            table.stat-table.striped
+                thead
+                    tr
+                        th Genders
+                        th Percentage
+                tbody
+                    each gender in genders
+                        tr
+                            td #{GENDERS[gender._id]}
+                            td #{(gender.count / count * 100).toFixed(1)}%

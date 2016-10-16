@@ -9,12 +9,12 @@ var ObjectId = Schema.Types.ObjectId;
 mongoose.connect('mongodb://localhost/medifact');
 
 var DrugSchema = new Schema({name: {type: String, unique: true}, population: Number});
-var CombSchema = new Schema({drugs: [{type: ObjectId, ref: 'Drug'}], symptom: Number});
+var CombSchema = new Schema({drugs: [{type: ObjectId, ref: 'Drug'}], symptom: Number, age: Number, gender: Number});
 
 var Drug = mongoose.model('Drug', DrugSchema);
 var Comb = mongoose.model('Comb', CombSchema);
 
-var THRESHOLD = process.env.MED_THRESHOLD || 30;
+var THRESHOLD = process.env.MED_THRESHOLD || 100;
 var SYMPTOMS = [
   'Vomit with blood',
   'Productive cough with blood',
@@ -29,14 +29,14 @@ var SYMPTOMS = [
 ];
 var AGE = [];
 for (var i = 0; i < 100; i++) AGE.push(i);
-var GENDER = ['Female', 'Male', 'Other'];
+var GENDERS = ['Female', 'Male', 'Other'];
 
 router.get('/profile', function (req, res, next) {
-  res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDER: GENDER});
+  res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDERS: GENDERS});
 });
 
 router.get('*', function (req, res, next) {
-  if('age' in req.cookies && 'gender' in req.cookies) return next();
+  if ('age' in req.cookies && 'gender' in req.cookies) return next();
   res.redirect('/profile');
 });
 
@@ -64,7 +64,7 @@ function calcVal(drugs, count, rows) {
 }
 
 function compare(a, b) {
-  return a.name > b.name
+  return a.name > b.name ? 1 : -1;
 }
 
 router.post('/($|check)', function (req, res, next) {
@@ -82,18 +82,39 @@ router.post('/($|check)', function (req, res, next) {
             drugs.forEach(function (drug, i) {
               drugs[i] = drug._id;
             });
-            Comb.aggregate([
-              {$match: {drugs: drugs.sort(compare)}},
-              {$group: {_id: '$symptom', count: {$sum: 1}}}
-            ], function (err, result) {
-              if (err) return next(err);
+            async.parallel({
+              symptoms: function (callback) {
+                Comb.aggregate([
+                  {$match: {drugs: drugs.sort(compare)}},
+                  {$group: {_id: '$symptom', count: {$sum: 1}}},
+                  {$sort: {count: -1}}
+                ], callback);
+              },
+              ages: function (callback) {
+                Comb.aggregate([
+                  {$match: {drugs: drugs.sort(compare)}},
+                  {$group: {_id: '$age', count: {$sum: 1}}},
+                  {$sort: {count: -1}}
+                ], callback);
+              },
+              genders: function (callback) {
+                Comb.aggregate([
+                  {$match: {drugs: drugs.sort(compare)}},
+                  {$group: {_id: '$gender', count: {$sum: 1}}},
+                  {$sort: {count: -1}}
+                ], callback);
+              }
+            }, function (err, result) {
               res.render('result', {
                 title: 'Medifact - Check Combinations',
                 val: val,
                 THRESHOLD: THRESHOLD,
                 combination: combination,
-                symptoms: result,
+                symptoms: result.symptoms,
+                genders: result.genders,
+                ages: result.ages,
                 SYMPTOMS: SYMPTOMS,
+                GENDERS: GENDERS,
                 count: count
               });
             });
@@ -104,7 +125,7 @@ router.post('/($|check)', function (req, res, next) {
   });
 });
 
-function insertData(drugs, symptom, next) {
+function insertData(drugs, symptom, age, gender, next) {
   var tasks = [];
   drugs.forEach(function (drug_name) {
     tasks.push(function (callback) {
@@ -124,18 +145,18 @@ function insertData(drugs, symptom, next) {
   });
   async.series(tasks, function (err, results) {
     if (err) return next(err);
-    else new Comb({drugs: results.sort(compare), symptom: symptom}).save(next);
+    else new Comb({drugs: results.sort(compare), symptom: symptom, age: (age / 10) | 0, gender: gender}).save(next);
   });
 }
 
 router.post('/report', function (req, res, next) {
   console.log(_.uniq(req.body.drugs));
-  if(_.uniq(req.body.drugs).length < req.body.drugs.length || ~req.body.drugs.indexOf('')){
+  if (_.uniq(req.body.drugs).length < req.body.drugs.length || ~req.body.drugs.indexOf('')) {
     return next(new Error('Invalid Drug.'));
   }
-  insertData(req.body.drugs, req.body.symptom, function (err) {
+  insertData(req.body.drugs, req.body.symptom, req.cookies.age, req.cookies.gender, function (err) {
     if (err) return next(err);
-    res.redirect('/stat')
+    res.redirect('/stat');
   });
 });
 
@@ -158,6 +179,8 @@ router.get('/fake', function (req, res, next) {
       var num = Math.random() < (process.env.MED_THREE_RATIO || 0.5) ? 3 : 2;
       var drugs = [];
       var symptom = (Math.random() * 10) | 0;
+      var age = (Math.random() * 100) | 0;
+      var gender = (Math.random() * 3) | 0;
       var used = [];
       for (var j = 0; j < num; j++) {
         var rand;
@@ -167,7 +190,7 @@ router.get('/fake', function (req, res, next) {
         used.push(rand);
         drugs.push('Drug ' + String.fromCharCode(rand + 65));
       }
-      insertData(drugs, symptom, callback);
+      insertData(drugs, symptom, age, gender, callback);
     });
   }
   async.series(tasks, function (err) {
@@ -207,7 +230,7 @@ router.get('/stat', function (req, res, next) {
           });
           res.render('stat', {
             title: 'Medifact - Statistics', dataPoints: dataPoints.sort(function (a, b) {
-              return a.y > b.y;
+              return a.y - b.y;
             })
           });
         });

@@ -13,7 +13,7 @@ block content
             div.input-field.col.s12
                 select#gender
                     option(value="" disabled selected) choose your gender
-                    each gender, i in GENDER
+                    each gender, i in GENDERS
                         option(value="#{i}") #{gender}
                 label Gender
         block report
