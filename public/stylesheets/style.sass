@@ -7,6 +7,9 @@ a
   color: #00B7FF
 
 .brand-logo
+  i
+    animation: heartbeat 1s infinite
+    margin-right: 4px !important
   padding: 0 16px !important
 
 nav + .row
@@ -23,6 +26,21 @@ nav + .row
 
 .github-fork-ribbon:before
   background: #EC6F75 !important
+
+@keyframes heartbeat
+  0%
+    transform: scale( .85 )
+  20%
+    transform: scale( 1 )
+  40%
+    transform: scale( .85 )
+  60%
+    transform: scale( 1 )
+  80%
+    transform: scale( .85 )
+  100%
+    transform: scale( .85 )
+  
 
 .stat-table
   tr > *:first-child

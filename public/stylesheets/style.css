@@ -8,6 +8,9 @@ a {
 
 .brand-logo {
   padding: 0 16px !important; }
+  .brand-logo i {
+    animation: heartbeat 1s infinite;
+    margin-right: 4px !important; }
 
 nav + .row {
   margin-top: 24px !important; }
@@ -23,6 +26,20 @@ nav + .row {
 
 .github-fork-ribbon:before {
   background: #EC6F75 !important; }
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(0.85); }
+  20% {
+    transform: scale(1); }
+  40% {
+    transform: scale(0.85); }
+  60% {
+    transform: scale(1); }
+  80% {
+    transform: scale(0.85); }
+  100% {
+    transform: scale(0.85); } }
 
 .stat-table tr > *:first-child {
   width: 80%;
