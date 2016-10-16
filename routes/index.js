@@ -36,6 +36,8 @@ var AGE = [];
 for (var i = 0; i < 100; i++) AGE.push(i);
 var GENDERS = ['Female', 'Male', 'Other'];
 var RACES = ['White', 'Asian', 'Black'];
+var DRUGS = [];
+for (var i = 0; i < 26; i++) DRUGS.push('Drug ' + String.fromCharCode(65 + i))
 
 router.get('/profile', function (req, res, next) {
   res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDERS: GENDERS, RACES: RACES});
@@ -47,7 +49,7 @@ router.get('*', function (req, res, next) {
 });
 
 router.get('/($|check)', function (req, res, next) {
-  res.render('check', {title: 'Medifact - Check Combinations', verb: 'will take'});
+  res.render('check', {title: 'Medifact - Check Combinations', verb: 'will take', DRUGS: DRUGS});
 });
 
 function calcVal(drugs, count, rows) {
@@ -77,6 +79,7 @@ router.post('/($|check)', function (req, res, next) {
   var condition = getCondition(req);
   Comb.count(condition, function (err, rows) {
     if (err) return next(err);
+    if (!req.body.drugs || req.body.drugs.length < 2) return next(new Error('No Drug Matches.'));
     Drug.find({name: {$in: req.body.drugs}}, function (err, drugs) {
       if (err) return next(err);
       else {
@@ -178,9 +181,9 @@ function insertData(drugs, symptom, age, gender, race, next) {
 }
 
 router.post('/report', function (req, res, next) {
-  if (_.uniq(req.body.drugs).length < req.body.drugs.length || ~req.body.drugs.indexOf('')) {
-    return next(new Error('Invalid Drug.'));
-  }
+  if (!req.body.drugs || req.body.drugs.length < 2
+    || _.uniq(req.body.drugs).length < req.body.drugs.length) return next(new Error('Invalid Drug.'));
+  if (!req.body.symptom) return next(new Error('Invalid Symptom.'));
   insertData(req.body.drugs, req.body.symptom, req.cookies.age, req.cookies.gender, req.cookies.race, function (err) {
     if (err) return next(err);
     res.redirect('/stat');
@@ -188,7 +191,13 @@ router.post('/report', function (req, res, next) {
 });
 
 router.get('/report', function (req, res, next) {
-  res.render('report', {title: 'Medifact - Report Symptoms', SYMPTOMS: SYMPTOMS, verb: 'took', report: true});
+  res.render('report', {
+    title: 'Medifact - Report Symptoms',
+    SYMPTOMS: SYMPTOMS,
+    verb: 'took',
+    report: true,
+    DRUGS: DRUGS
+  });
 });
 
 router.get('/clear', function (req, res, next) {
@@ -209,7 +218,7 @@ router.get('/fake', function (req, res, next) {
   var tasks = [];
   for (var i = 0; i < 1000; i++) {
     tasks.push(function (callback) {
-      var num = Math.random() < (process.env.MED_THREE_RATIO || 0.5) ? 3 : 2;
+      var num = Math.random() < (process.env.MED_THREE_RATIO || 0.4) ? 3 : 2;
       var drugs = [];
       var symptom = (Math.random() * SYMPTOMS.length) | 0;
       var age = (Math.random() * 100) | 0;
@@ -256,7 +265,6 @@ router.get('/stat', function (req, res, next) {
         }
       }
     ], function (err, result) {
-      console.log(result);
       if (err) return next(err);
       else {
         Drug.populate(result, {path: '_id'}, function (err, result) {
