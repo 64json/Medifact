@@ -7,40 +7,40 @@ block content
     script.
         window.onload = function () {
             var chart = new CanvasJS.Chart("chartContainer",
-                    {
-                        title: {
-                            text: "Possibility of Untoward Occurrence of Combined Drugs (% Threshold)"
-                        },
-                        animationEnabled: true,
-                        legend: {
-                            verticalAlign: "center",
-                            horizontalAlign: "left",
-                            fontSize: 10,
-                            fontFamily: "Helvetica",
-                            reversed: true
-                        },
-                        theme: "theme2",
-                        data: [
-                            {
-                                click: function (e) {
-                                    var drugs = e.dataPoint.label.split(' + ');
-                                    drugs.forEach(function (drug, i) {
-                                        $('form').append($('<input type="hidden" name="drugs[' + i + ']">').val(drug));
-                                    });
-                                    $('form').submit();
-                                    $('form').empty();
-                                },
-                                type: "pie",
-                                indexLabelFontFamily: "Garamond",
-                                indexLabelFontSize: 20,
-                                indexLabel: " ",
-                                indexLabelPlacement: "inside",
-                                startAngle: -20,
-                                showInLegend: true,
-                                toolTipContent: "{legendText}: {y}%",
-                                dataPoints: !{JSON.stringify(dataPoints)}
-                            }
-                        ]
-                    });
+                {
+                    title: {
+                        text: "Possibility of Untoward Occurrence of Combined Drugs (% Threshold)"
+                    },
+                    animationEnabled: true,
+                    legend: {
+                        verticalAlign: "center",
+                        horizontalAlign: "left",
+                        fontSize: 10,
+                        fontFamily: "Helvetica",
+                        reversed: true
+                    },
+                    theme: "theme2",
+                    data: [
+                        {
+                            click: function (e) {
+                                var drugs = e.dataPoint.label.split(' + ');
+                                drugs.forEach(function (drug, i) {
+                                    $('form').append($('<input type="hidden" name="drugs[' + i + ']">').val(drug));
+                                });
+                                $('form').submit();
+                                $('form').empty();
+                            },
+                            type: "pie",
+                            indexLabelFontFamily: "Garamond",
+                            indexLabelFontSize: 20,
+                            indexLabel: " ",
+                            indexLabelPlacement: "inside",
+                            startAngle: -20,
+                            showInLegend: true,
+                            toolTipContent: "{legendText}: {y}%",
+                            dataPoints: !{JSON.stringify(dataPoints)}
+                        }
+                    ]
+                });
             chart.render();
         }

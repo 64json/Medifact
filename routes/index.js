@@ -13,7 +13,7 @@ var CombSchema = new Schema({drugs: [{type: ObjectId, ref: 'Drug'}], symptom: Nu
 var Drug = mongoose.model('Drug', DrugSchema);
 var Comb = mongoose.model('Comb', CombSchema);
 
-var THRESHOLD = 200;
+var THRESHOLD = process.env.MED_THRESHOLD || 200;
 var SYMPTOMS = [
   'Vomit with blood',
   'Productive cough with blood',
@@ -127,7 +127,7 @@ router.get('/fake', function (req, res, next) {
   var tasks = [];
   for (var i = 0; i < 1000; i++) {
     tasks.push(function (callback) {
-      var num = Math.random() < 0.5 ? 3 : 2;
+      var num = Math.random() < (process.env.MED_THREE_RATIO || 0.5) ? 3 : 2;
       var drugs = [];
       var symptom = (Math.random() * 10) | 0;
       var used = [];
