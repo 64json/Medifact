@@ -25,7 +25,7 @@ block content
     - var color = "#6a1b9a"
     - }
     .col.s12(style="color: #666")
-        h6(style="margin-bottom: 0px") Classified as:
+        h6(style="margin-bottom: 0px") #{combination} is classified for you as:
         h3(style="color: #{color}; margin-top: 0px")=title
         - if (p >= 0) {
         h5
@@ -79,12 +79,6 @@ block content
                     | reported the <b>#{(count3 / occurrences * 100).toFixed(1)}%</b> of the total occurrences.
                 else
                     | not reported any occurrence yet.
-            p
-                | Based on your age, gender, and race, you&nbsp;
-                if flag1 && flag2 && flag3
-                    | have approximately <b>#{(count1 * count2 * count3 / Math.pow(occurrences, 3) * 100).toFixed(1)}%</b> chance for the occurrence.
-                else
-                    | may be safe from the occurence.
         - } else {
         h5 You are now a test subject.</br><span style="font-size: 10px">We hope you don't die.</span>
         - }
