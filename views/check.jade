@@ -5,21 +5,22 @@ block content
         - for (var i = 1; i <= 2; ++i) {
         div.row
             div.input-field.col.s12
-                input.validate(id="drug#{i}", placeholder="drug #{i} you #{verb}", name="drugs[#{i - 1}]", type="text")
+                input.validate(id="drug#{i}", placeholder="#{'the ' + i + ['st', 'nd', 'rd', 'th'][Math.min(i - 1, 3)]} drug you #{verb}", name="drugs[#{i - 1}]", type="text")
                 label(for="drug#{i}") Drug #{i}
         - }
         block report
         div.row.button-row
-            a.waves-effect.waves-light.btn.col.s5#btn_add Add Drugs
-            .col.s2
-            button.waves-effect.waves-light.btn.col.s5(type="submit") Submit
+            div.col.s4
+                a#btn_add.waves-effect.waves-light.btn.full Add Drugs
+            div.col.s8
+                button.waves-effect.waves-light.btn.full(type="submit") Submit
     script.
         if (!$('.menu-report').hasClass('active')) $('.menu-check').addClass('active');
         $('#btn_add').click(function () {
             index = $('form .row input.validate').length + 1;
             cloned = $('form .row:first-child').clone();
             cloned.find('input').attr("id", "drug" + index);
-            cloned.find('input').attr("placeholder", "drug " + index + " you #{verb}");
+            cloned.find('input').attr("placeholder", 'the ' + index + ['st', 'nd', 'rd', 'th'][Math.min(index - 1, 3)] + " drug you #{verb}");
             cloned.find('input').val("")
             cloned.find('input').attr("name", "drugs[" + (index - 1) + "]")
             cloned.find('label').attr("for", "drug" + index);

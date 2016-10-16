@@ -40,7 +40,7 @@ router.get('*', function (req, res, next) {
   res.redirect('/profile');
 });
 
-router.get('/($|check)', function (req, res, next) {
+router.get('/check', function (req, res, next) {
   res.render('check', {title: 'Medifact - Check Combinations', verb: 'will take'});
 });
 
@@ -150,7 +150,6 @@ function insertData(drugs, symptom, age, gender, next) {
 }
 
 router.post('/report', function (req, res, next) {
-  console.log(_.uniq(req.body.drugs));
   if (_.uniq(req.body.drugs).length < req.body.drugs.length || ~req.body.drugs.indexOf('')) {
     return next(new Error('Invalid Drug.'));
   }

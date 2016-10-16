@@ -9,6 +9,13 @@ a
 .brand-logo
   i
     animation: heartbeat 1s infinite
+    &.death
+      animation: none
+      color: black
+    &.hazardous
+      animation: heartbeat .4s infinite
+    &.dangerous
+      animation: heartbeat .6s infinite
     margin-right: 4px !important
   padding: 0 16px !important
 
@@ -29,18 +36,17 @@ nav + .row
 
 @keyframes heartbeat
   0%
-    transform: scale( .85 )
+    transform: scale(.85)
   20%
-    transform: scale( 1 )
+    transform: scale(1)
   40%
-    transform: scale( .85 )
+    transform: scale(.85)
   60%
-    transform: scale( 1 )
+    transform: scale(1)
   80%
-    transform: scale( .85 )
+    transform: scale(.85)
   100%
-    transform: scale( .85 )
-  
+    transform: scale(.85)
 
 .stat-table
   tr > *:first-child
@@ -50,14 +56,65 @@ nav + .row
     width: 20%
     text-align: center
 
-@media only screen and (max-width : 992px)
+.full
+  width: 100% !important
+
+.splash
+  position: absolute
+  left: 0
+  right: 0
+  top: 0
+  bottom: 0
+  background: #EC6F75
+  z-index: 9999
+  animation: splash-back 1.3333s 1
+  opacity: 0
+  pointer-events: none
+  i
+    position: absolute
+    top: 50%
+    margin-top: -40px
+    left: 50%
+    margin-left: -40px
+    color: white
+    animation: heartbeat-splash 1.3333s 1
+    font-size: 64px
+    line-height: 80px
+    width: 80px
+    text-align: center
+
+@keyframes heartbeat-splash
+  0%
+    transform: scale(.85)
+  15%
+    transform: scale(1)
+  30%
+    transform: scale(.85)
+  45%
+    transform: scale(1)
+  60%
+    transform: scale(.85)
+  75%
+    transform: scale(.85)
+  100%
+    transform: scale(3)
+
+@keyframes splash-back
+  0%
+    opacity: 1
+  75%
+    opacity: 1
+  100%
+    opacity: 0
+
+@media only screen and (max-width: 992px)
   .manual-padding
     width: 16.66667% !important
 
   .main-column
     width: 66.6667% !important
 
-@media only screen and (max-width : 600px)
+@media only screen and (max-width: 600px)
   .manual-padding
     display: none
 

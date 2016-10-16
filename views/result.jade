@@ -4,12 +4,15 @@ block content
     - var p = val / THRESHOLD
     - if (p > 5) {
     - var title = "DEATH"
+    - var cls = "death"
     - var color = "black"
     - } else if (p > 2) {
     - var title = "HAZARDOUS"
+    - var cls = "hazardous"
     - var color = "#C62828"
     - } else if (p > 1) {
     - var title = "DANGEROUS"
+    - var cls = "dangerous"
     - var color = "#ef6c00"
     - } else if (p > .5) {
     - var title = "CAUTION"
@@ -30,6 +33,7 @@ block content
         - }
     script.
         $('.menu-check').addClass('active');
+        $('.brand-logo i').addClass('#{cls}');
 block cards
     div.row
         div.col.s3.manual-padding
