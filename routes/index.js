@@ -13,7 +13,7 @@ var CombSchema = new Schema({drugs: [{type: ObjectId, ref: 'Drug'}], symptom: Nu
 var Drug = mongoose.model('Drug', DrugSchema);
 var Comb = mongoose.model('Comb', CombSchema);
 
-var THRESHOLD = process.env.MED_THRESHOLD || 200;
+var THRESHOLD = process.env.MED_THRESHOLD || 30;
 var SYMPTOMS = [
   'Vomit with blood',
   'Productive cough with blood',
@@ -121,6 +121,12 @@ router.post('/report', function (req, res, next) {
 
 router.all('/report', function (req, res, next) {
   res.render('report', {title: 'Medifact - Report Symptoms', SYMPTOMS: SYMPTOMS, verb: 'took'});
+});
+
+router.get('/clear', function (req, res, next) {
+  Drug.remove({}, function(err){});
+  Comb.remove({}, function(err){});
+  next();
 });
 
 router.get('/fake', function (req, res, next) {
