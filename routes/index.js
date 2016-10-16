@@ -9,7 +9,13 @@ var ObjectId = Schema.Types.ObjectId;
 mongoose.connect('mongodb://localhost/medifact');
 
 var DrugSchema = new Schema({name: {type: String, unique: true}, population: Number});
-var CombSchema = new Schema({drugs: [{type: ObjectId, ref: 'Drug'}], symptom: Number, age: Number, gender: Number});
+var CombSchema = new Schema({
+  drugs: [{type: ObjectId, ref: 'Drug'}],
+  symptom: Number,
+  age: Number,
+  gender: Number,
+  race: Number
+});
 
 var Drug = mongoose.model('Drug', DrugSchema);
 var Comb = mongoose.model('Comb', CombSchema);
@@ -24,19 +30,19 @@ var SYMPTOMS = [
   'Incontinence',
   'Foul breath',
   'Fruity, alcoholic breath',
-  'Insomnia',
-  'Other'
+  'Insomnia'
 ];
 var AGE = [];
 for (var i = 0; i < 100; i++) AGE.push(i);
 var GENDERS = ['Female', 'Male', 'Other'];
+var RACES = ['Caucasian', 'Mongolian', 'Negroid'];
 
 router.get('/profile', function (req, res, next) {
-  res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDERS: GENDERS});
+  res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDERS: GENDERS, RACES: RACES});
 });
 
 router.get('*', function (req, res, next) {
-  if ('age' in req.cookies && 'gender' in req.cookies) return next();
+  if ('age' in req.cookies && 'gender' in req.cookies && 'race' in req.cookies) return next();
   res.redirect('/profile');
 });
 
@@ -68,13 +74,14 @@ function compare(a, b) {
 }
 
 router.post('/($|check)', function (req, res, next) {
-  Comb.count(function (err, rows) {
+  var condition = getCondition(req);
+  Comb.count(condition, function (err, rows) {
     if (err) return next(err);
     Drug.find({name: {$in: req.body.drugs}}, function (err, drugs) {
       if (err) return next(err);
       else {
         if (drugs.length != req.body.drugs.length) return next(new Error('No Drug Matches.'));
-        Comb.count({drugs: drugs.sort(compare)}, function (err, count) {
+        Comb.count(_.extend({drugs: drugs.sort(compare)}, condition), function (err, count) {
           if (err) return next(err);
           else {
             var val = count < 1 ? -1 : calcVal(drugs, count, rows);
@@ -83,6 +90,9 @@ router.post('/($|check)', function (req, res, next) {
               drugs[i] = drug._id;
             });
             async.parallel({
+              occurences: function (callback) {
+                Comb.count({drugs: drugs.sort(compare)}, callback);
+              },
               symptoms: function (callback) {
                 Comb.aggregate([
                   {$match: {drugs: drugs.sort(compare)}},
@@ -103,6 +113,13 @@ router.post('/($|check)', function (req, res, next) {
                   {$group: {_id: '$gender', count: {$sum: 1}}},
                   {$sort: {count: -1}}
                 ], callback);
+              },
+              races: function (callback) {
+                Comb.aggregate([
+                  {$match: {drugs: drugs.sort(compare)}},
+                  {$group: {_id: '$race', count: {$sum: 1}}},
+                  {$sort: {count: -1}}
+                ], callback);
               }
             }, function (err, result) {
               res.render('result', {
@@ -113,9 +130,14 @@ router.post('/($|check)', function (req, res, next) {
                 symptoms: result.symptoms,
                 genders: result.genders,
                 ages: result.ages,
+                races: result.races,
+                occurrences: result.occurences,
                 SYMPTOMS: SYMPTOMS,
                 GENDERS: GENDERS,
-                count: count
+                RACES: RACES,
+                age_group: (req.cookies.age / 10) | 0,
+                gender_group: req.cookies.gender,
+                race_group: req.cookies.race
               });
             });
           }
@@ -125,7 +147,7 @@ router.post('/($|check)', function (req, res, next) {
   });
 });
 
-function insertData(drugs, symptom, age, gender, next) {
+function insertData(drugs, symptom, age, gender, race, next) {
   var tasks = [];
   drugs.forEach(function (drug_name) {
     tasks.push(function (callback) {
@@ -145,7 +167,13 @@ function insertData(drugs, symptom, age, gender, next) {
   });
   async.series(tasks, function (err, results) {
     if (err) return next(err);
-    else new Comb({drugs: results.sort(compare), symptom: symptom, age: (age / 10) | 0, gender: gender}).save(next);
+    else new Comb({
+      drugs: results.sort(compare),
+      symptom: symptom,
+      age: (age / 10) | 0,
+      gender: gender,
+      race: race
+    }).save(next);
   });
 }
 
@@ -153,7 +181,7 @@ router.post('/report', function (req, res, next) {
   if (_.uniq(req.body.drugs).length < req.body.drugs.length || ~req.body.drugs.indexOf('')) {
     return next(new Error('Invalid Drug.'));
   }
-  insertData(req.body.drugs, req.body.symptom, req.cookies.age, req.cookies.gender, function (err) {
+  insertData(req.body.drugs, req.body.symptom, req.cookies.age, req.cookies.gender, req.cookies.race, function (err) {
     if (err) return next(err);
     res.redirect('/stat');
   });
@@ -164,11 +192,17 @@ router.get('/report', function (req, res, next) {
 });
 
 router.get('/clear', function (req, res, next) {
-  Drug.remove({}, function (err) {
+  async.parallel([
+    function (callback) {
+      Drug.remove({}, callback);
+    },
+    function (callback) {
+      Comb.remove({}, callback);
+    }
+  ], function (err) {
+    if (err) return next(err);
+    res.redirect('/stat');
   });
-  Comb.remove({}, function (err) {
-  });
-  next();
 });
 
 router.get('/fake', function (req, res, next) {
@@ -177,9 +211,10 @@ router.get('/fake', function (req, res, next) {
     tasks.push(function (callback) {
       var num = Math.random() < (process.env.MED_THREE_RATIO || 0.5) ? 3 : 2;
       var drugs = [];
-      var symptom = (Math.random() * 10) | 0;
+      var symptom = (Math.random() * SYMPTOMS.length) | 0;
       var age = (Math.random() * 100) | 0;
-      var gender = (Math.random() * 3) | 0;
+      var gender = (Math.random() * GENDERS.length) | 0;
+      var race = (Math.random() * RACES.length) | 0;
       var used = [];
       for (var j = 0; j < num; j++) {
         var rand;
@@ -189,7 +224,7 @@ router.get('/fake', function (req, res, next) {
         used.push(rand);
         drugs.push('Drug ' + String.fromCharCode(rand + 65));
       }
-      insertData(drugs, symptom, age, gender, callback);
+      insertData(drugs, symptom, age, gender, race, callback);
     });
   }
   async.series(tasks, function (err) {
@@ -198,10 +233,22 @@ router.get('/fake', function (req, res, next) {
   })
 });
 
+function getCondition(req) {
+  return {
+    age: (req.cookies.age / 10) | 0,
+    gender: req.cookies.gender | 0,
+    race: req.cookies.race | 0
+  };
+}
+
 router.get('/stat', function (req, res, next) {
-  Comb.count(function (err, rows) {
+  var condition = getCondition(req);
+  Comb.count(condition, function (err, rows) {
     if (err) return next(err);
     Comb.aggregate([
+      {
+        $match: condition
+      },
       {
         $group: {
           _id: '$drugs',
@@ -209,6 +256,7 @@ router.get('/stat', function (req, res, next) {
         }
       }
     ], function (err, result) {
+      console.log(result);
       if (err) return next(err);
       else {
         Drug.populate(result, {path: '_id'}, function (err, result) {

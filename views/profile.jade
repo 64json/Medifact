@@ -16,6 +16,13 @@ block content
                     each gender, i in GENDERS
                         option(value="#{i}") #{gender}
                 label Gender
+        div.row
+            div.input-field.col.s12
+                select#race
+                    option(value="" disabled selected) choose your race
+                    each race, i in RACES
+                        option(value="#{i}") #{race}
+                label Race
         block report
         div.row.button-row
             button.waves-effect.waves-light.btn.col.s12 Submit
@@ -25,9 +32,11 @@ block content
         });
         $('#age').val($.cookie("age"));
         $('#gender').val($.cookie("gender"));
+        $('#race').val($.cookie("race"));
         $('button').click(function () {
             $.cookie("age", $('#age').val());
             $.cookie("gender", $('#gender').val());
+            $.cookie("race", $('#race').val());
             window.location.href = '/check';
         });
     script.

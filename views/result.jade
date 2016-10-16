@@ -25,9 +25,66 @@ block content
     - var color = "#6a1b9a"
     - }
     .col.s12(style="color: #666")
-        h3(style="color: #{color}; margin-top: 0")=title
+        h6(style="margin-bottom: 0px") Classified as:
+        h3(style="color: #{color}; margin-top: 0px")=title
         - if (p >= 0) {
-        h5 The possibility of untoward occurrence of #{combination} is <b style="color: #{color}">#{(p * 100).toFixed(2)}%</b> of the threshold.
+        h5
+            - var majority = 0
+            - var m_symptoms = ''
+            each symptom, i in symptoms
+                - majority += symptom.count / occurrences
+                - if (i > 0){
+                - if (majority >= 0.5) m_symptoms += (i > 1 ? ',' : '') + ' or '
+                - else m_symptoms += ', '
+                - }
+                - m_symptoms += '<b>' + SYMPTOMS[symptom._id].toLowerCase() + '</b>'
+                - if (majority >= 0.5) {
+                - break
+                - }
+            p The possibility of untoward occurrence of #{combination} is <b style="color: #{color}">#{(p * 100).toFixed(2)}%</b> of the threshold.
+            p The majority of the occurrences have accompanied !{m_symptoms}.
+            p
+                - var flag1
+                - var flag2
+                - var flag3
+                - var count1
+                each age in ages
+                    if(age._id == age_group)
+                        - flag1 = true
+                        - count1 = age.count
+                        - break
+                each gender in genders
+                    if(gender._id == gender_group)
+                        - flag2 = true
+                        - count2 = gender.count
+                        - break
+                each race in races
+                    if(race._id == race_group)
+                        - flag3 = true
+                        - count3 = race.count
+                        - break
+                if flag1
+                    | <b>#{(count1 / occurrences * 100).toFixed(1)}%</b> of the total occurrences have&nbsp;
+                else
+                    | No occurrence has&nbsp;
+                | been reported by the people of an age between #{age_group * 10} and #{(age_group + 1) * 10 - 1}, #{flag1 != flag2 ? 'but' : 'and'}&nbsp;
+                if flag2
+                    | <b>#{(count2 / occurrences * 100).toFixed(1)}%</b> #{flag1 ? '' : 'of the total occurrences'} have&nbsp;
+                else
+                    | no occurrence has&nbsp;
+                | been reported by the people in your gender group#{!flag1 && !flag2 ? ' either' : ''}.
+            p
+                | #{RACES[race_group]}s have&nbsp;
+                if flag3
+                    | reported the <b>#{(count3 / occurrences * 100).toFixed(1)}%</b> of the total occurrences.
+                else
+                    | not reported any occurrence yet.
+            p
+                | Based on your age, gender, and race, you&nbsp;
+                if flag1 && flag2 && flag3
+                    | have approximately <b>#{(count1 * count2 * count3 / Math.pow(occurrences, 3) * 100).toFixed(1)}%</b> chance for the occurrence.
+                else
+                    | may be safe from the occurence.
         - } else {
         h5 You are now a test subject.</br><span style="font-size: 10px">We hope you don't die.</span>
         - }
@@ -38,7 +95,7 @@ block cards
     div.row
         div.col.s3.manual-padding
         div.col.s6.main-column.card
-            table.stat-table.striped
+            table.stat-table
                 thead
                     tr
                         th Symptoms
@@ -47,30 +104,43 @@ block cards
                     each symptom in symptoms
                         tr
                             td #{SYMPTOMS[symptom._id]}
-                            td #{(symptom.count / count * 100).toFixed(1)}%
+                            td #{(symptom.count / occurrences * 100).toFixed(1)}%
     div.row
         div.col.s3.manual-padding
         div.col.s6.main-column.card
-            table.stat-table.striped
+            table.stat-table
                 thead
                     tr
                         th Ages
                         th Percentage
                 tbody
                     each age in ages
-                        tr
+                        tr(class="#{age._id == age_group ? 'active' : ''}")
                             td #{age._id * 10} - #{(age._id + 1) * 10 - 1}
-                            td #{(age.count / count * 100).toFixed(1)}%
+                            td #{(age.count / occurrences * 100).toFixed(1)}%
     div.row
         div.col.s3.manual-padding
         div.col.s6.main-column.card
-            table.stat-table.striped
+            table.stat-table
                 thead
                     tr
                         th Genders
                         th Percentage
                 tbody
                     each gender in genders
-                        tr
+                        tr(class="#{gender._id == gender_group ? 'active' : ''}")
                             td #{GENDERS[gender._id]}
-                            td #{(gender.count / count * 100).toFixed(1)}%
+                            td #{(gender.count / occurrences * 100).toFixed(1)}%
+    div.row
+        div.col.s3.manual-padding
+        div.col.s6.main-column.card
+            table.stat-table
+                thead
+                    tr
+                        th Races
+                        th Percentage
+                tbody
+                    each race in races
+                        tr(class="#{race._id == race_group ? 'active' : ''}")
+                            td #{RACES[race._id]}
+                            td #{(race.count / occurrences * 100).toFixed(1)}%

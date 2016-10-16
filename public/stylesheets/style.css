@@ -34,6 +34,9 @@ nav + .row {
 .github-fork-ribbon:before {
   background: #EC6F75 !important; }
 
+tr.active td {
+  background: #fce4ec; }
+
 @keyframes heartbeat {
   0% {
     transform: scale(0.85); }
