@@ -84,7 +84,7 @@ router.post('/($|check)', function (req, res, next) {
         Comb.count(_.extend({drugs: drugs.sort(compare)}, condition), function (err, count) {
           if (err) return next(err);
           else {
-            var val = count < 1 ? -1 : calcVal(drugs, count, rows);
+            var val = rows < 3 ? -1 : calcVal(drugs, count, rows);
             var combination = req.body.drugs.join(' + ');
             drugs.forEach(function (drug, i) {
               drugs[i] = drug._id;
@@ -266,7 +266,7 @@ router.get('/stat', function (req, res, next) {
             datum._id.forEach(function (drug) {
               names.push(drug.name);
             });
-            var val = datum.count < 1 ? -1 : calcVal(datum._id, datum.count, rows);
+            var val = rows < 3 ? -1 : calcVal(datum._id, datum.count, rows);
             if (val > THRESHOLD) {
               dataPoints.push({
                 y: (val / THRESHOLD * 100).toFixed(2),
