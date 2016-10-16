@@ -1,5 +1,15 @@
 extends layout
 
+block inline-style
+    style.
+        .manual-padding {
+            width: 16.66667% !important
+        }
+
+        .main-column {
+            min-width: 66.6667% !important
+        }
+
 block content
     div.col.s12
         #chartContainer.col.s12(style="height: calc(100vh - 120px)")
@@ -9,13 +19,14 @@ block content
             var chart = new CanvasJS.Chart("chartContainer",
                 {
                     title: {
-                        text: "Possibility of Untoward Occurrence of Combined Drugs (% Threshold)"
+                        text: "Possibility of Untoward Occurrence of Combined Drugs (% Threshold)",
+                        fontSize: 36
                     },
                     animationEnabled: true,
                     legend: {
                         verticalAlign: "center",
                         horizontalAlign: "left",
-                        fontSize: 10,
+                        fontSize: 14,
                         fontFamily: "Helvetica",
                         reversed: true
                     },
@@ -44,3 +55,4 @@ block content
                 });
             chart.render();
         }
+        $('.menu-stat').addClass('active');

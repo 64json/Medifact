@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var async = require('async');
+var _ = require('underscore');
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
@@ -26,6 +27,18 @@ var SYMPTOMS = [
   'Insomnia',
   'Other'
 ];
+var AGE = [];
+for (var i = 0; i < 100; i++) AGE.push(i);
+var GENDER = ['Female', 'Male', 'Other'];
+
+router.get('/profile', function (req, res, next) {
+  res.render('profile', {title: 'Medifact - Profile Setting', AGE: AGE, GENDER: GENDER});
+});
+
+router.get('*', function (req, res, next) {
+  if('age' in req.cookies && 'gender' in req.cookies) return next();
+  res.redirect('/profile');
+});
 
 router.get('/($|check)', function (req, res, next) {
   res.render('check', {title: 'Medifact - Check Combinations', verb: 'will take'});
@@ -60,7 +73,7 @@ router.post('/($|check)', function (req, res, next) {
     Drug.find({name: {$in: req.body.drugs}}, function (err, drugs) {
       if (err) return next(err);
       else {
-        if (drugs.length != req.body.drugs.length) return next(new Error('No drug matches.'));
+        if (drugs.length != req.body.drugs.length) return next(new Error('No Drug Matches.'));
         Comb.count({drugs: drugs.sort(compare)}, function (err, count) {
           if (err) return next(err);
           else {
@@ -116,16 +129,25 @@ function insertData(drugs, symptom, next) {
 }
 
 router.post('/report', function (req, res, next) {
-  insertData(req.body.drugs, req.body.symptom, next);
+  console.log(_.uniq(req.body.drugs));
+  if(_.uniq(req.body.drugs).length < req.body.drugs.length || ~req.body.drugs.indexOf('')){
+    return next(new Error('Invalid Drug.'));
+  }
+  insertData(req.body.drugs, req.body.symptom, function (err) {
+    if (err) return next(err);
+    res.redirect('/stat')
+  });
 });
 
-router.all('/report', function (req, res, next) {
+router.get('/report', function (req, res, next) {
   res.render('report', {title: 'Medifact - Report Symptoms', SYMPTOMS: SYMPTOMS, verb: 'took'});
 });
 
 router.get('/clear', function (req, res, next) {
-  Drug.remove({}, function(err){});
-  Comb.remove({}, function(err){});
+  Drug.remove({}, function (err) {
+  });
+  Comb.remove({}, function (err) {
+  });
   next();
 });
 
@@ -183,7 +205,11 @@ router.get('/stat', function (req, res, next) {
               });
             }
           });
-          res.render('stat', {title: 'Medifact - Statistics', dataPoints: dataPoints});
+          res.render('stat', {
+            title: 'Medifact - Statistics', dataPoints: dataPoints.sort(function (a, b) {
+              return a.y > b.y;
+            })
+          });
         });
       }
     });
